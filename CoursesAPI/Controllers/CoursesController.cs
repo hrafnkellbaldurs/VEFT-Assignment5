@@ -22,7 +22,7 @@ namespace CoursesAPI.Controllers
         [AllowAnonymous]
         public IHttpActionResult GetCoursesBySemester(string semester = null, int page = 1)
         {
-            var language = this.Request.Headers.AcceptLanguage.First().ToString();
+            var language = Request.Headers.AcceptLanguage.First().ToString();
             return Ok(_service.GetCourseInstancesBySemester(language, semester, page));
         }
 

@@ -99,7 +99,7 @@ namespace CoursesAPI.Services.Services
 
         /// <summary>
         /// Finds CourseInstances taught on the given semester.
-        /// If no language is specified, the language "is-IS" is used instead.
+        /// If no language is specified, the language "is" is used instead.
         /// If no semester is given, the current semester "20153" is used instead.
         /// If no page number is given, the first page is used.
         /// If the page number exceeds the total number of pages, an empty list is returned.
@@ -110,6 +110,8 @@ namespace CoursesAPI.Services.Services
         /// <returns>A List of CourseInstanceDTOs taught on the given semester</returns>
         public Envelope<List<CourseInstanceDTO>> GetCourseInstancesBySemester(string language = null, string semester = null, int page = 1)
         {
+            const string langIS = "is";  
+
             const int ITEMS_PER_PAGE = 10;
 
             // Assign a default semester if no semester is given
@@ -121,42 +123,22 @@ namespace CoursesAPI.Services.Services
             // Assign a default language if no language is specified
             if (string.IsNullOrEmpty(language))
             {
-                language = "is-IS";
+                language = langIS;
             }
-
-            var courses = new List<CourseInstanceDTO>();
-
-            // If the language header is set to anything else than icelandic, get english names. Else, get icelandic names
-            if (!language.Equals("is-IS"))
-            {
-                // Construct the list of courses tought in the given semester
-                courses = (from c in _courseInstances.All()
+         
+            // Construct the list of courses tought in the given semester 
+            // with the course name language set to the users preference
+            var courses = (from c in _courseInstances.All()
                            join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
                            where c.SemesterID == semester
                            select new CourseInstanceDTO
                            {
-                               Name = ct.NameEN,
+                               Name = language == langIS? ct.Name : ct.NameEN,
                                TemplateID = ct.CourseID,
                                CourseInstanceID = c.ID,
                                MainTeacher = ""
                            }).OrderBy(dto => dto.CourseInstanceID).Skip((page - 1) * ITEMS_PER_PAGE).Take(ITEMS_PER_PAGE).ToList();
 
-            }
-            else
-            {
-                // Construct the list of courses tought in the given semester
-                courses = (from c in _courseInstances.All()
-                           join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
-                           where c.SemesterID == semester
-                           select new CourseInstanceDTO
-                           {
-                               Name = ct.Name,
-                               TemplateID = ct.CourseID,
-                               CourseInstanceID = c.ID,
-                               MainTeacher = ""
-                           }).OrderBy(dto => dto.CourseInstanceID).Skip((page - 1) * ITEMS_PER_PAGE).Take(ITEMS_PER_PAGE).ToList();
-
-            }
 
             // Find main teacher name
             foreach (var ciDTO in courses)
