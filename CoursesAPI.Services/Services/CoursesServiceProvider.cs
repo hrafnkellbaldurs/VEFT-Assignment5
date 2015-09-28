@@ -101,11 +101,12 @@ namespace CoursesAPI.Services.Services
         /// Finds CourseInstances taught on the given semester.
         /// If no language is specified, the language "is-IS" is used instead.
         /// If no semester is given, the current semester "20153" is used instead.
-        /// If no page is given, the first page is used.
+        /// If no page number is given, the first page is used.
+        /// If the page number exceeds the total number of pages, an empty list is returned.
         /// </summary>
-        /// <param name="language">The language the user has specified</param>
+        /// <param name="language">The language the user has specified for the name of each course.</param>
         /// <param name="semester">The semester to get courses from</param>
-        /// <param name="page"></param>
+        /// <param name="page">The number of the page to get from the list of course instances</param>
         /// <returns>A List of CourseInstanceDTOs taught on the given semester</returns>
         public Envelope<List<CourseInstanceDTO>> GetCourseInstancesBySemester(string language = null, string semester = null, int page = 1)
         {
@@ -125,8 +126,8 @@ namespace CoursesAPI.Services.Services
 
             var courses = new List<CourseInstanceDTO>();
 
-            // If the language header is set to english, get english names. Else, get icelandic names
-            if (language.Equals("en-US"))
+            // If the language header is set to anything else than icelandic, get english names. Else, get icelandic names
+            if (!language.Equals("is-IS"))
             {
                 // Construct the list of courses tought in the given semester
                 courses = (from c in _courseInstances.All()
