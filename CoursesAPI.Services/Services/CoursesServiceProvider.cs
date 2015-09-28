@@ -105,30 +105,35 @@ namespace CoursesAPI.Services.Services
         /// <param name="page"></param>
         /// <returns>A List of CourseInstanceDTOs taught on the given semester</returns>
         public List<CourseInstanceDTO> GetCourseInstancesBySemester(string language, string semester = null, int page = 1)
-		{
+        {
+            const int itemsPerPage = 10;
+
             // Assign a default semester if no semester is given
 			if (string.IsNullOrEmpty(semester))
 			{
 				semester = "20153";
 			}
 
-            if (language == null) language = "en-US";
+            if (string.IsNullOrEmpty(language))
+            {
+                language = "is-IS";
+            }
 
             var courses = new List<CourseInstanceDTO>();
 
-            if (language.Equals("is-IS"))
+            if (language.Equals("en-US"))
             {
                 // Construct the list of courses tought in the given semester
                 courses = (from c in _courseInstances.All()
-                    join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
-                    where c.SemesterID == semester
-                    select new CourseInstanceDTO
-                    {
-                        Name = ct.Name,
-                        TemplateID = ct.CourseID,
-                        CourseInstanceID = c.ID,
-                        MainTeacher = ""
-                    }).ToList();
+                           join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
+                           where c.SemesterID == semester
+                           select new CourseInstanceDTO
+                           {
+                               Name = ct.NameEN,
+                               TemplateID = ct.CourseID,
+                               CourseInstanceID = c.ID,
+                               MainTeacher = ""
+                           }).OrderBy(dto => dto.CourseInstanceID).Skip((page-1)*itemsPerPage).Take(itemsPerPage).ToList();
 
             }
             else
@@ -139,13 +144,13 @@ namespace CoursesAPI.Services.Services
                            where c.SemesterID == semester
                            select new CourseInstanceDTO
                            {
-                               Name = ct.NameEng,
+                               Name = ct.Name,
                                TemplateID = ct.CourseID,
                                CourseInstanceID = c.ID,
                                MainTeacher = ""
-                           }).ToList();
+                           }).OrderBy(dto => dto.CourseInstanceID).Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
 
-          }
+            }
 
 
             

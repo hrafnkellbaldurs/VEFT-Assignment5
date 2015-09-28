@@ -27,7 +27,7 @@ namespace CoursesAPI.Services.Models.Entities
         /// <summary>
 		/// The name of the course in english. Example: "Web Services".
 		/// </summary>
-        public string NameEng      { get; set; }
+        public string NameEN      { get; set; }
 
 		/// <summary>
 		/// A short description of the course.
