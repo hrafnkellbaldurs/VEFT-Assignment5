@@ -139,7 +139,7 @@ namespace CoursesAPI.Tests.Services
 		{
 			// Arrange:
 		    // Act:
-		    var DTOList = _service.GetCourseInstancesBySemester("20173");
+		    var DTOList = _service.GetCourseInstancesBySemester(null ,"20173", 1).Items;
             // Note: the method uses test data defined in [TestInitialize]
 
             // Assert:
@@ -155,15 +155,15 @@ namespace CoursesAPI.Tests.Services
         {
             // Arrange:
             // Act:
-            var DTOList1 = _service.GetCourseInstancesBySemester("20153");
-            var DTOList2 = _service.GetCourseInstancesBySemester("20163");
+            var DTOList1 = _service.GetCourseInstancesBySemester(null, "20153", 1);
+            var DTOList2 = _service.GetCourseInstancesBySemester(null, "20163", 1);
 
             // Assert:
-            Assert.AreEqual(2, DTOList1.Count);
-            Assert.AreEqual(1, DTOList2.Count);
+            Assert.AreEqual(2, DTOList1.Items.Count);
+            Assert.AreEqual(1, DTOList2.Items.Count);
 
             // Testing if data is being set up right
-            var veft20163DTO = DTOList2[0];
+            var veft20163DTO = DTOList2.Items[0];
             Assert.AreEqual(COURSEID_VEFT_20163, veft20163DTO.CourseInstanceID);
             Assert.AreEqual("Vefþjónustur", veft20163DTO.Name );
             Assert.AreEqual("T-514-VEFT", veft20163DTO.TemplateID);
@@ -180,7 +180,7 @@ namespace CoursesAPI.Tests.Services
         {
             // Arrange:
             // Act:
-            var DTOList = _service.GetCourseInstancesBySemester();
+            var DTOList = _service.GetCourseInstancesBySemester().Items;
 
             // Assert:
             Assert.AreEqual(2, DTOList.Count);
@@ -196,7 +196,7 @@ namespace CoursesAPI.Tests.Services
         {
             // Arrange:
             // Act:
-            var DTOList = _service.GetCourseInstancesBySemester("20153");
+            var DTOList = _service.GetCourseInstancesBySemester(null,"20153", 1).Items;
 
             // Assert:
             foreach (var ciDTO in DTOList)
@@ -215,7 +215,7 @@ namespace CoursesAPI.Tests.Services
         {
             // Arrange:
             // Act:
-            var DTOList = _service.GetCourseInstancesBySemester("20153");
+            var DTOList = _service.GetCourseInstancesBySemester(null, "20153", 1).Items;
 
             // Assert:
             foreach (var ciDTO in DTOList)
@@ -239,7 +239,7 @@ namespace CoursesAPI.Tests.Services
         {
             // Arrange:
             // Act:
-            var DTOList = _service.GetCourseInstancesBySemester("20153");
+            var DTOList = _service.GetCourseInstancesBySemester(null, "20153", 1).Items;
 
             // Assert:
             foreach (var ciDTO in DTOList)

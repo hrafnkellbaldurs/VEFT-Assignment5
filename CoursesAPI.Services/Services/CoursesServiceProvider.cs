@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Security.AccessControl;
@@ -98,15 +99,17 @@ namespace CoursesAPI.Services.Services
 
         /// <summary>
         /// Finds CourseInstances taught on the given semester.
+        /// If no language is specified, the language "is-IS" is used instead.
         /// If no semester is given, the current semester "20153" is used instead.
+        /// If no page is given, the first page is used.
         /// </summary>
         /// <param name="language">The language the user has specified</param>
         /// <param name="semester">The semester to get courses from</param>
         /// <param name="page"></param>
         /// <returns>A List of CourseInstanceDTOs taught on the given semester</returns>
-        public List<CourseInstanceDTO> GetCourseInstancesBySemester(string language, string semester = null, int page = 1)
+        public Envelope<List<CourseInstanceDTO>> GetCourseInstancesBySemester(string language = null, string semester = null, int page = 1)
         {
-            const int itemsPerPage = 10;
+            const int ITEMS_PER_PAGE = 10;
 
             // Assign a default semester if no semester is given
 			if (string.IsNullOrEmpty(semester))
@@ -114,6 +117,7 @@ namespace CoursesAPI.Services.Services
 				semester = "20153";
 			}
 
+            // Assign a default language if no language is specified
             if (string.IsNullOrEmpty(language))
             {
                 language = "is-IS";
@@ -121,6 +125,7 @@ namespace CoursesAPI.Services.Services
 
             var courses = new List<CourseInstanceDTO>();
 
+            // If the language header is set to english, get english names. Else, get icelandic names
             if (language.Equals("en-US"))
             {
                 // Construct the list of courses tought in the given semester
@@ -133,7 +138,7 @@ namespace CoursesAPI.Services.Services
                                TemplateID = ct.CourseID,
                                CourseInstanceID = c.ID,
                                MainTeacher = ""
-                           }).OrderBy(dto => dto.CourseInstanceID).Skip((page-1)*itemsPerPage).Take(itemsPerPage).ToList();
+                           }).OrderBy(dto => dto.CourseInstanceID).Skip((page - 1) * ITEMS_PER_PAGE).Take(ITEMS_PER_PAGE).ToList();
 
             }
             else
@@ -148,15 +153,12 @@ namespace CoursesAPI.Services.Services
                                TemplateID = ct.CourseID,
                                CourseInstanceID = c.ID,
                                MainTeacher = ""
-                           }).OrderBy(dto => dto.CourseInstanceID).Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
+                           }).OrderBy(dto => dto.CourseInstanceID).Skip((page - 1) * ITEMS_PER_PAGE).Take(ITEMS_PER_PAGE).ToList();
 
             }
 
-
-            
-
             // Find main teacher name
-		    foreach (var ciDTO in courses)
+            foreach (var ciDTO in courses)
 		    {
 		        var mainTeacherRegistration = (from tr in _teacherRegistrations.All()
 		            where tr.CourseInstanceID == ciDTO.CourseInstanceID
@@ -176,7 +178,30 @@ namespace CoursesAPI.Services.Services
 		        } 
 		    }
 
-			return courses;
+            // Total number of courses tought in the given semester
+            var coursesTotalCount = (from c in _courseInstances.All()
+                                     join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
+                                     where c.SemesterID == semester
+                                     select new object()).Count();
+
+            // Get the total number of pages in the collection
+            var pageCount = (int) (Math.Ceiling(((double)coursesTotalCount) / ((double)ITEMS_PER_PAGE)));
+
+            // Construct the envelope to return
+            var envelope = new Envelope<List<CourseInstanceDTO>>
+            {
+                Items = courses,
+                Paging = new Envelope<List<CourseInstanceDTO>>.PagingInfo
+                {
+                    PageCount = pageCount,
+                    PageNumber = page,
+                    PageSize = ITEMS_PER_PAGE,
+                    TotalNumberOfItems = coursesTotalCount
+                }
+            };
+
+
+			return envelope;
 		}
 	}
 }
