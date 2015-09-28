@@ -96,13 +96,14 @@ namespace CoursesAPI.Services.Services
 			return personDTO;
 		}
 
-		/// <summary>
-		/// Finds CourseInstances taught on the given semester.
-		/// If no semester is given, the current semester "20153" is used instead.
-		/// </summary>
-		/// <param name="semester">The semester to get courses from</param>
-		/// <returns>A List of CourseInstanceDTOs taught on the given semester</returns>
-		public List<CourseInstanceDTO> GetCourseInstancesBySemester(string semester = null)
+        /// <summary>
+        /// Finds CourseInstances taught on the given semester.
+        /// If no semester is given, the current semester "20153" is used instead.
+        /// </summary>
+        /// <param name="semester">The semester to get courses from</param>
+        /// <param name="page"></param>
+        /// <returns>A List of CourseInstanceDTOs taught on the given semester</returns>
+        public List<CourseInstanceDTO> GetCourseInstancesBySemester(string semester = null, int page = 1)
 		{
             // Assign a default semester if no semester is given
 			if (string.IsNullOrEmpty(semester))
