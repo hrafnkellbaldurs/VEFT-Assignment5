@@ -100,10 +100,11 @@ namespace CoursesAPI.Services.Services
         /// Finds CourseInstances taught on the given semester.
         /// If no semester is given, the current semester "20153" is used instead.
         /// </summary>
+        /// <param name="language">The language the user has specified</param>
         /// <param name="semester">The semester to get courses from</param>
         /// <param name="page"></param>
         /// <returns>A List of CourseInstanceDTOs taught on the given semester</returns>
-        public List<CourseInstanceDTO> GetCourseInstancesBySemester(string semester = null, int page = 1)
+        public List<CourseInstanceDTO> GetCourseInstancesBySemester(string language, string semester = null, int page = 1)
 		{
             // Assign a default semester if no semester is given
 			if (string.IsNullOrEmpty(semester))
@@ -111,17 +112,43 @@ namespace CoursesAPI.Services.Services
 				semester = "20153";
 			}
 
-            // Construct the list of courses tought in the given semester
-			var courses = (from c in _courseInstances.All()
-				           join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
-				           where c.SemesterID == semester
-				           select new CourseInstanceDTO
-				           {
-					           Name               = ct.Name,
-					           TemplateID         = ct.CourseID,
-					           CourseInstanceID   = c.ID,
-					           MainTeacher        = ""
-				           }).ToList();
+            if (language == null) language = "en-US";
+
+            var courses = new List<CourseInstanceDTO>();
+
+            if (language.Equals("is-IS"))
+            {
+                // Construct the list of courses tought in the given semester
+                courses = (from c in _courseInstances.All()
+                    join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
+                    where c.SemesterID == semester
+                    select new CourseInstanceDTO
+                    {
+                        Name = ct.Name,
+                        TemplateID = ct.CourseID,
+                        CourseInstanceID = c.ID,
+                        MainTeacher = ""
+                    }).ToList();
+
+            }
+            else
+            {
+                // Construct the list of courses tought in the given semester
+                courses = (from c in _courseInstances.All()
+                           join ct in _courseTemplates.All() on c.CourseID equals ct.CourseID
+                           where c.SemesterID == semester
+                           select new CourseInstanceDTO
+                           {
+                               Name = ct.NameEng,
+                               TemplateID = ct.CourseID,
+                               CourseInstanceID = c.ID,
+                               MainTeacher = ""
+                           }).ToList();
+
+          }
+
+
+            
 
             // Find main teacher name
 		    foreach (var ciDTO in courses)

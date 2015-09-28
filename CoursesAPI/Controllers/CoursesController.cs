@@ -1,4 +1,7 @@
-﻿using System.Web.Http;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using System.Web;
+using System.Web.Http;
 using CoursesAPI.Models;
 using CoursesAPI.Services.DataAccess;
 using CoursesAPI.Services.Services;
@@ -19,9 +22,8 @@ namespace CoursesAPI.Controllers
         [AllowAnonymous]
         public IHttpActionResult GetCoursesBySemester(string semester = null, int page = 1)
         {
-            // TODO: figure out the requested language (if any!)
-            // and pass it to the service provider!
-            return Ok(_service.GetCourseInstancesBySemester(semester, page));
+            var language = this.Request.Headers.AcceptLanguage.First().ToString();
+            return Ok(_service.GetCourseInstancesBySemester(language, semester, page));
         }
 
         /// <summary>
